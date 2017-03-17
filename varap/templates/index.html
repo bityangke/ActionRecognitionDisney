@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
 
     <title>MSCV-Disney</title>
 
     <!--for bootstrap-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
     <!-- for bootstrap sortable -->
     <link rel="stylesheet" href="../static/css/bootstrap-sortable.css">
-
+    <!-- font awesome icon -->
+    <script src="https://use.fontawesome.com/5a5ed6b33c.js"></script>
     <!-- Custom styles for this template -->
-    <link href="../static/starter-template.css" rel="stylesheet">
+    <link href="../static/css/starter-template.css" rel="stylesheet">
+    <!-- JQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   </head>
 
   <body>
@@ -79,7 +80,7 @@
       </center>
 
       <h3 align="center"> Performance per Class </h3>
-        <table class="table sortable" width="100%">
+        <table class="table sortable" width="100%" id="tb_class_perf">
           <thead class="thead-default">
             <tr>
               <th>Class</th> <th>Index</th> <th>mAP</th><th>Precision</th><th>Recall</th><th>Accuracy</th>
@@ -88,8 +89,9 @@
           <tbody>
             {% for item in class_performance %}
             <tr>
-                <td>{{item['class_name']}}
-                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target={{"#myModal"~item['class_name']}}>explore</button>
+                <td>
+                  <i class="fa fa-eye explore_button" aria-hidden="true" class_id={{item['class_id']}} class_name={{item['class_name']}}></i>
+                  {{item['class_name']}}
                 </td>
                 <td>{{item['class_id']}}</td>
                 <td>{{'%.2f' % (item['map'] * 100)}}</td>
@@ -102,16 +104,28 @@
         </table>
 
       <!--Video Player Modal-->
-      {% for item in class_performance %}
-      <div class="modal fade" tabindex="-1" role="dialog" id={{"myModal"~item['class_name']}}>
+      <div class="modal fade" tabindex="-1" role="dialog" id="model_explore">
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">{{"Video Explorer("~item['class_name']~")"}}</h4>
+              <h4 class="modal-title" id="explore_title"></h4>
             </div>
             <div class="modal-body">
-
+              <div class="container">
+                <div class="row justify-content-md-center" id='explore_video_name' style="color:#808080;font-size:10px"> video name </div>
+                <div class="row justify-content-md-center">
+                  <div class = "col align-self-center" align="right"> 
+                    <i class="fa fa-chevron-left fa-3x" aria-hidden="true" id='prev_video'></i>
+                  </div>
+                  <div class = "col col-md-auto"> 
+                    <video src="" width="320" height="320" loop="loop" autoplay="autoplay" controls="controls" id="video_display"></video>
+                  </div>
+                  <div class = "col align-self-center" align="left"> 
+                    <i class="fa fa-chevron-right fa-3x" aria-hidden="true" id='next_video'></i>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -119,16 +133,17 @@
           </div>
         </div>
       </div>
-    {% endfor %}
     </div><!-- /.container -->
 
+
+    <!--Custom Javascript-->
+    <script src="../static/js/index.js"></script>
+
     <!-- For Bootstrap-->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>\\
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>\\
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="../static/js/ie10-viewport-bug-workaround.js"></script>
 
     <!-- For bootstrap sortable -->
     <script src="../static/js/bootstrap-sortable.js"></script>

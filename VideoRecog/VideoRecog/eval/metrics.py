@@ -14,7 +14,6 @@ def get_confusion_matrix(scores, labels):
     """
     predicts = np.argmax(scores, axis=1)
     cf = confusion_matrix(labels, predicts).astype(float)
-    print(cf[:, 1])
     return cf
 
 

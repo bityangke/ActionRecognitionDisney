@@ -150,11 +150,14 @@ class DataActivityNet:
         self.__annotation_file = annotation_file
         self.__frame_folders = frame_folders
         self.labels = None
-        self.label_idx_table = None
+        self.label_id_table = None  # id is the unique id assigned by AcNet data-set, id does not need to be continuous
         self.taxonomy = None
         self.label_hierarchy = None
         self.version = None
         self.video_meta = {}
+        self.class_to_videos = {}
+        self.class_to_video_path = {}
+        self.class_path_to_videos = {}
 
     def init(self):
         """
@@ -165,30 +168,82 @@ class DataActivityNet:
         # fetch version info
         self.version = data['version'].split()[1]
         # parse labels
-        self.labels, self.label_idx_table = DataActivityNet.__parse_labels(data['taxonomy'])
+        self.labels, self.label_id_table = DataActivityNet.__parse_labels(data['taxonomy'])
         self.label_hierarchy = LabelHierarchy()
         self.label_hierarchy.build(self.labels)
         # parse data-set
         self.video_meta = DataActivityNet.__parse_database(data['database'])
+        # establish indexing structure
+        self.__establish_mapping_class_to_videos()
 
-    def label_idx_to_name(self, label_idx):
+    def label_id_to_name(self, label_id):
         """
         convert the label index to its name
-        :param label_idx:
+        :param label_id:
         :return: label name
         """
-        assert (label_idx < len(self.labels))
-        return self.labels[label_idx].name
+        return self.labels[label_id].name
+
+    def label_name_to_idx(self, label_name):
+        """
+        convert the label name to its index
+        :param label_name:
+        :return:
+        """
+        return self.label_id_table[label_name]
 
     def get_num_classes(self):
         return len(self.labels)
 
+    def get_video_names_by_class_id(self, class_id):
+        """
+        get a list of video names by class id
+        """
+        return self.class_to_videos[class_id]
+
+    def get_video_names_by_class_name(self, class_name):
+        """
+        get a list of video names by class name
+        """
+        class_id = self.label_name_to_idx(class_name)
+        return self.get_video_names_by_class_id(class_id)
+
+    def get_video_paths_by_class_id(self, class_id):
+        """
+        get a list of video paths by class id
+        """
+        return self.class_path_to_videos[class_id]
+
+    def get_video_paths_by_class_name(self, class_name):
+        """
+        get a list of video paths by class name
+        """
+        class_id = self.label_name_to_idx(class_name)
+        return self.get_video_paths_by_class_id(class_id)
+
+    def __establish_mapping_class_to_videos(self):
+        """
+        establish the mapping from classes to videos
+        """
+        self.class_to_videos = {}
+        self.class_path_to_videos = {}
+        for video_name, video_meta in self.video_meta.iteritems():
+            label_name = video_meta.label
+            if label_name not in self.label_id_table:
+                continue
+            label_id = self.label_name_to_idx(label_name)
+            if label_id not in self.class_to_videos:
+                self.class_to_videos[label_id] = []
+                self.class_path_to_videos[label_id] = []
+            self.class_to_videos[label_id].append(video_name)
+            self.class_path_to_videos[label_id].append('acnet_video/' + video_name + '.mp4')
+
     @staticmethod
     def __parse_labels(taxonomy):
         labels = [Label(item['nodeId'], item['nodeName'], item['parentId'], item['parentName']) for item in taxonomy]
-        label_idx_table = {item['nodeName']: item['nodeId'] for item in taxonomy}
+        label_id_table = {item['nodeName']: item['nodeId'] for item in taxonomy}
         labels.sort(key=lambda label: label.id)
-        return labels, label_idx_table
+        return labels, label_id_table
 
     @staticmethod
     def __parse_database(database):
@@ -220,3 +275,5 @@ if __name__ == '__main__':
     print(data_manager.label_hierarchy)
     for k, v in data_manager.video_meta.iteritems():
         print(v)
+    print(data_manager.get_video_names_by_class_name('Preparing salad'))
+    print(data_manager.get_video_paths_by_class_name('Preparing salad'))
