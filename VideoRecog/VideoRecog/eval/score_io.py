@@ -1,41 +1,17 @@
 """
 routines for loading & writing prediction scores
 """
-
 import numpy as np
+import datetime
+import os
 
-
-def softmax(raw_score, T=1):
-    exp_s = np.exp((raw_score - raw_score.max(axis=-1)[..., None])*T)
-    sum_s = exp_s.sum(axis=-1)
-    return exp_s / sum_s[..., None]
-
-
-def default_aggregation_func(score_arr, normalization=True, crop_agg=None):
-    """
-    This is the default function for make video-level prediction
-    :param score_arr: a 3-dim array with (frame, crop, class) layout
-    :return:
-    """
-    crop_agg = np.mean if crop_agg is None else crop_agg
-    if normalization:
-        return softmax(crop_agg(score_arr, axis=1).mean(axis=0))
-    else:
-        return crop_agg(score_arr, axis=1).mean(axis=0)
-
-
-def load_scores_an(file_path):
-    """
-    special version for handling activity net score dump
-    :param file_path:
-    :return:
-    """
-    result = np.load(file_path)
-    scores = np.array(map(default_aggregation_func, result['scores'][:,0]))
-    labels = None
-    if 'labels' in result:
-        labels = result['labels']
-    return scores, labels
+class ScoreDumpMeta():
+    def __init__(self, dataset, title):
+        self.dataset = dataset
+        self.title = title
+        self.date = None
+    def __str__(self):
+        return '(' + ', '.join([self.dataset, self.title, self.date]) + ')'
 
 
 def load_scores(file_path):
@@ -45,18 +21,22 @@ def load_scores(file_path):
     """
     result = np.load(file_path)
     scores = result['scores']
-    labels = None
-    if 'labels' in result:
-        labels = result['labels']
-    return scores, labels
+    labels = result['labels']
+    meta = result['meta']
+    return scores, labels, meta
 
 
-def save_scores(file_path, scores, labels=None):
+def save_scores(folder, scores, labels, meta, auto_time_stamp=True):
     """
-    save prediciton scores
+    save prediciton scores to folder
     :return:
     """
-    np.savez(file_path, scores=scores, labels=labels)
+    if auto_time_stamp:
+        meta.date = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+    file_path = os.path.join(folder, meta.title + '.npz')
+    np.savez(file_path, meta=meta, scores=scores, labels=labels)
 
 
 def test():
@@ -66,3 +46,4 @@ def test():
 
 if __name__ == '__main__':
     test()
+

@@ -40,7 +40,7 @@ video_manager.cur_vidoe_name = function() {
 }
 
 $('.explore_button').click(function() {
-  dataset = "hmdb51"
+  dataset = "activity_net"  // TODO: we need a more flexible way to handle this
   class_id = $(this).attr('class_id')
   class_name = $(this).attr('class_name')
   $.getJSON('/request_video_list/' + dataset + '/' + class_id, function(jd) {
