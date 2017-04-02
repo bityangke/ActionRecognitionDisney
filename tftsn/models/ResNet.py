@@ -3,31 +3,28 @@ from keras.models import Model
 from keras import layers
 from keras.layers import Activation, Dense, Input, BatchNormalization, Conv2D
 from keras.layers import MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
-from keras.layers import GlobalMaxPooling2D, ZeroPadding2D
+from keras.layers import GlobalMaxPooling2D, ZeroPadding2D, Flatten
 import keras.backend as K
-from blocks import buildblocks
+from models.blocks import buildblocks
 
 class ResNet:
     def __init__(self):
         pass
+
     #Creating the ResNet model with 200 classes as default as of now, change 
     #this if the model changes
+    
     def resnet(input_tensor=None, input_shape=None, classes=200):
     #Will add functionality to load the pre-trained weights as well later
         input_shape = (224,224,3)
 
-        if input_tensor is None:
-            img_input = Input(shape=input_shape)
-        else:
-            if not K.is_keras_tensor(input_tensor):
-                img_input = Input(tensor=input_tensor, shape=input_shape)
-            else:
-                img_input = input_tensor
+        #if input_tensor is None:
+        img_input = Input(shape=input_shape)
         #By default the number of axes has to be three
         bn_axis = 3
 
         #Creating the model now
-        print('The shape of the input image is', img_input)
+        
         x = ZeroPadding2D((3, 3))(img_input)
         x = Conv2D(64, (7, 7), strides=(2, 2), name='conv1')(x)
         x = BatchNormalization(axis=bn_axis, name='bn_conv1')(x)
@@ -57,12 +54,8 @@ class ResNet:
         x = AveragePooling2D((7, 7), name='avg_pool')(x)
         x = Flatten()(x)
         x = Dense(classes, activation='softmax', name='fc200')(x)
-        if input_tensor is not None:
-            inputs = get_source_inputs(input_tensor)
-        else:
-            inputs = img_input
+        
         # Create model.
-        model = Model(inputs, x, name='resnet')
-        print('The model is', model.summary())
-        return models
+        model = Model(img_input, x, name='resnet')
+        return model
         
