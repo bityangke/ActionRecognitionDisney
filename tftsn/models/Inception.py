@@ -19,7 +19,7 @@ class Inception:
     
     def inception(input_tensor=None, input_shape=None, classes=200):
     #Will add functionality to load the pre-trained weights as well later
-        input_shape = (299,299,3)
+        input_shape = (299,299,10)
 
         #if input_tensor is None:
         img_input = Input(shape=input_shape)

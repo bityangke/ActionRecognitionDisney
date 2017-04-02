@@ -10,10 +10,11 @@ class Network:
         img = np.zeros((1,224,224,3),dtype=np.float32)
         self.resnet = ResNet()
         self.rgbmodel = self.resnet.resnet()
-        print( self.rgbmodel.predict(img))
+        #print( self.rgbmodel.predict(img))
         self.inception = Inception()
         self.flowmodel= self.inception.inception()
-        print(self.flowmodel.summary())
+        img = np.zeros((1,299,299,10),dtype=np.float32)
+        #print(self.flowmodel.predict(img))
 
 
 
