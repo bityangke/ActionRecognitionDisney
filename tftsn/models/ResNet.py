@@ -10,14 +10,14 @@ from models.blocks import buildblocks
 class ResNet:
     def __init__(self):
         pass
-
+    
     #Creating the ResNet model with 200 classes as default as of now, change 
     #this if the model changes
     
     def resnet(input_tensor=None, input_shape=None, classes=200):
     #Will add functionality to load the pre-trained weights as well later
         input_shape = (224,224,3)
-
+        K.set_learning_phase(1)
         #if input_tensor is None:
         img_input = Input(shape=input_shape)
         #By default the number of axes has to be three
