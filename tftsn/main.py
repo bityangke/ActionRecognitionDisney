@@ -9,9 +9,30 @@ from keras.layers import MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import GlobalMaxPooling2D, ZeroPadding2D, Flatten
 import keras.backend as K
 
+from VideoRecog.VideoRecog.data.activity_net import DataActivityNet
+from VideoRecog.VideoRecog.TSNUtils.frame_sampler import *
+
 #Function to train the network
 def train(model):
     pass
+
+
+def sampler_usage():
+    # initailize data manager and sampler
+    annotation_path = '/data01/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json'
+    frame_folder = '/data01/mscvproject/data/ActivityNetTrimflow/view'
+    data_manager = DataActivityNet(annotation_path, frame_folder)
+    sampler = UniformSegmentSampler(num_segments=4)
+
+    iteration = 0
+    max_iteration = 1000
+    while iteration < max_iteration
+        # sample a mini-batch
+        # frame_type: 0 for rgb, 1 for flow_x, 2 for flow_y, 3 for both flow_x and flow_y
+        # mini_batch is of shape: (n, h, w, c)
+        mini_batch = data_manager.get_minibatch(sampler, frame_type = 1)
+        #train
+        #.....
 
 def main():
     writer = tf.summary.FileWriter('logs', graph=tf.get_default_graph())

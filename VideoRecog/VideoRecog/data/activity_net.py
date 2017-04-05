@@ -6,6 +6,7 @@ import json
 import numpy as np
 import os
 import cv2
+import random
 
 
 class LabelRawInfo:
@@ -269,6 +270,38 @@ class DataActivityNet:
                     frame_paths.append(full_path)
         return frame_paths
 
+    def get_minibatch(self, sampler, frame_type):
+        """
+        get minibatch through sampler
+        :param sampler: frame sampler to be used
+        :param frame_type: the type of the frame (0 for rgb, 1 for flow_x, 2 for flow_y, 3 for both flow_x and flow_y)
+        :return: (n, h, w, c)
+        """
+        # randomly choose a video
+        video_idx = random.randrange(0, len(self.video_seg_names))
+
+        # fetch the paths of all frames
+        frame_paths = []
+        if 0 <= frame_type <=2:
+            frame_paths = self.get_frame_paths(video_idx, frame_type)
+        elif frame_type == 3:
+            frame_paths_flow_x = self.get_frame_paths(video_idx, 1)
+            frame_paths_flow_y = self.get_frame_paths(video_idx, 2)
+            assert(len(frame_paths_flow_x) == len(frame_paths_flow_y))
+            for i in range(len(frame_paths_flow_x)):
+                frame_paths.append(frame_paths_flow_x[i])
+                frame_paths.append(frame_paths_flow_y[i])
+        frame_paths = np.array(frame_paths)
+
+        # sample mini-batch
+        num_frame = len(frame_paths)
+        indices = sampler.sample_minibatch_indices(num_frame)
+        selected_frame_paths = frame_paths[indices]
+        result = []
+        for frame_path in selected_frame_paths:
+            result.append(cv2.imread(frame_path, cv2.IMREAD_UNCHANGED))
+        return np.array(result)
+
     def vidoe_frame_iterator(self, video_idx, frame_type, batch_size=1, step=1):
         """
         create an iterator that iterate through frames of a video
@@ -412,7 +445,7 @@ class DataActivityNet:
 
 
 if __name__ == '__main__':
-    data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNet/activity_net.v1-3.min.json', 
+    data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
                                    frame_folders='/data01/mscvproject/data/ActivityNetTrimflow/view')
     data_manager.init()
     # print(data_manager.label_hierarchy)
