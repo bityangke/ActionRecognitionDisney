@@ -1,10 +1,10 @@
-spatial_net_prototxt=/data01/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/resnet200_anet_2016_deploy.prototxt
-spatial_net_model=/data01/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/resnet200_anet_2016.caffemodel
-temporal_net_prototxt=/data01/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/bn_inception_anet_2016_temporal_deploy.prototxt
-temporal_net_model=/data01/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/bn_inception_anet_2016_temporal.caffemodel.v5
-num_gpu=16
-gpu_start_idx=0
-scores_dump_folder='scores/reference/'
+spatial_net_prototxt=/home/mscvproject/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/resnet200_anet_2016_deploy.prototxt
+spatial_net_model=/home/mscvproject/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/resnet200_anet_2016.caffemodel
+temporal_net_prototxt=/home/mscvproject/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/bn_inception_anet_2016_temporal_deploy.prototxt
+temporal_net_model=/home/mscvproject/mscvproject/code/ActionRecognitionDisney/TSN_eval/models/bn_inception_anet_2016_temporal.caffemodel.v5
+num_gpu=7
+gpu_start_idx=2
+scores_dump_folder='scores/untrimmed_val/ref/'
 score_layer_name='fc-action'
 
 # scores meta info

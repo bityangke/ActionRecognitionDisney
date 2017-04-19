@@ -8,6 +8,10 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import average_precision_score
 from sklearn.preprocessing import label_binarize
 
+def softmax(raw_score, T=1):
+    exp_s = np.exp((raw_score - raw_score.max(axis=-1)[..., None])*T)
+    sum_s = exp_s.sum(axis=-1)
+    return exp_s / sum_s[..., None]
 
 def get_confusion_matrix(scores, labels):
     """
