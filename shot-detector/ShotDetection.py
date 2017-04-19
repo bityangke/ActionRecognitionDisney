@@ -15,7 +15,7 @@ total = None
 def process_video(args):
     global count, total, lock
     video_name, output_folder, idx = args
-    os.system('./Shotdetect/build/shotdetect-cmd -i {0} -o {1} -s 100 -a {2} -m -f -l'.format(video_name, output_folder, idx))
+    os.system('./Shotdetect/build/shotdetect-cmd -i {0} -o {1} -s 100 -a {2}'.format(video_name, output_folder, idx))
     lock.acquire()
     count.value += 1
     print('{0}/{1} videos completed.'.format(count.value, total))
