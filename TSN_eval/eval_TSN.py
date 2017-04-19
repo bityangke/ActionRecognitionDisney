@@ -14,7 +14,7 @@ anet_home = os.environ['ANET_HOME']
 import sys
 sys.path.append(anet_home)
 from pyActionRec.action_classifier import ActionClassifier
-sys.path.append('/data01/mscvproject/code/ActionRecognitionDisney/VideoRecog')
+sys.path.append('/home/mscvproject/mscvproject/code/ActionRecognitionDisney/VideoRecog')
 from VideoRecog.data.activity_net import DataActivityNet
 from VideoRecog.eval.score_io import save_scores
 from VideoRecog.eval.score_io import ScoreDumpMeta
@@ -28,8 +28,9 @@ def init_data_manager_ACNet():
     Create and initialize data_manager for ActivityNet
     :return:
     """
-    data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNet/activity_net.v1-3.min.json',
-                                   frame_folders='/data01/mscvproject/data/ActivityNetTrimflow/view')
+    data_manager = DataActivityNet(annotation_file='/home/mscvproject/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
+                                   frame_folders='/home/mscvproject/mscvproject/data/ActivityNetUntrimflow/view',
+                                   trimmed = False)
     data_manager.init()
     return data_manager
 
@@ -39,7 +40,6 @@ def build_classifier(data_manager, gpu_index):
     build the end-to-end classifier
     :return:
     """
-
     # initialize classifier
     models = []
     models.append((spatial_deploy_prototxt_file, spatial_model_file, 1.0, 0, False))
@@ -72,8 +72,8 @@ def infer_video(video_name):
     shared_video_processed.value += 1
     counter_lock.release()
     print('inferring ' + video_name + ' (' + str(shared_video_processed.value) +'/' + str(video_total) + ')...')
-    scores, model_scores, _, _ = cls.classify(video_name)
-    return scores, model_scores
+    scores, model_scores, all_scores, _ = cls.classify(video_name, verbose=False)
+    return scores, model_scores, all_scores
 
 def inference():
     video_names, labels = dm.get_validation_set()
@@ -93,6 +93,7 @@ def inference():
         results = p.map(infer_video, video_names)
     scores = [result[0] for result in results]         
     model_scores = [result[1] for result in results]    # num_vid x num_model x num_classes
+    all_scores = [result[2] for result in results]      # num_vid x num_frames x num_model x num_classes
 
     # find out all the cases where no frames are presented...
     bad_videos = []
@@ -100,6 +101,7 @@ def inference():
         if scores[i] is None:
             scores.pop(i)
             model_scores.pop(i)
+            all_scores.pop(i)
             labels.pop(i)
             bad_videos.append(video_names[i])
 
@@ -114,6 +116,10 @@ def inference():
     for i in range(len(model_scores)):
         meta = ScoreDumpMeta(scores_dataset, scores_title + '_model_{0}'.format(i))
         save_scores(scores_dump_folder, scores=model_scores[i], labels=labels, meta=meta)
+
+    # save scores from each model for each frames of each video (for detailed analysis)
+    meta = ScoreDumpMeta(scores_dataset, scores_title + '_all')
+    save_scores(scores_dump_folder, scores=all_scores, labels=labels, meta=meta)
 
     print('{0} Videos Tested'.format(len(scores)))
     print('{0} Bad Videos Found'.format(len(bad_videos)))

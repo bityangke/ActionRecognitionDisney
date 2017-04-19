@@ -45,10 +45,10 @@ class ActionClassifier(object):
             frm_scores: frame-wise classification scores
         """
         video_idx = self.__data_manager.get_video_idx_by_name(video_name)
-        rgb_frm_it = self.__data_manager.vidoe_frame_iterator(video_idx, frame_type=0, batch_size=1, step=10)
+        rgb_frm_it = self.__data_manager.vidoe_frame_iterator(video_idx, frame_type=0, batch_size=1, step=5)
         flow_frm_it = None
         if self.__need_flow:
-            flow_frm_it = self.__data_manager.vidoe_frame_iterator(video_idx, frame_type=1, batch_size=10, step=1)
+            flow_frm_it = self.__data_manager.vidoe_frame_iterator(video_idx, frame_type=3, batch_size=10, step=1)
         all_scores = []
         all_start = time.clock()
 
@@ -87,7 +87,7 @@ class ActionClassifier(object):
             if verbose:
                 print("frame sample {}: {} second".format(cnt, elapsed))
 
-        if len(all_scores) == 0:
+        if len(all_scores) == 0: # all_score is of size (#model, #frames, #models, #classes)
             if verbose:
                 print('warning: no frames found for ' + video_name)
             return None, None, None, None

@@ -1,10 +1,10 @@
-spatial_net_prototxt=/data01/mscvproject/code/temporal-segment-networks/models/ActNet200/tsn_bn_inception_rgb_deploy.prototxt
-spatial_net_model=/data01/mscvproject/code/temporal-segment-networks/models/ActNet200/top5BNFreeze/ActNet200_tsn_rgb_bn_inceptionseg5top3BNfreeze_iter_15000.caffemodel
-temporal_net_prototxt=/data01/mscvproject/code/temporal-segment-networks/models/ActNet200/tsn_bn_inception_flow_deploy.prototxt
-temporal_net_model=/data01/mscvproject/code/temporal-segment-networks/models/ActNet200/top5BNFreeze/ActNet200_tsn_flow_bn_inceptionseg5top3BNFreeze_iter_20000.caffemodel
-num_gpu=16
-gpu_start_idx=0
-scores_dump_folder='scores/seg5/'
+spatial_net_prototxt=/home/mscvproject/mscvproject/code/temporal-segment-networks/models/ActNet200/tsn_bn_inception_rgb_deploy.prototxt
+spatial_net_model=/home/mscvproject/mscvproject/code/temporal-segment-networks/models/ActNet200/top5BNFreeze/ActNet200_tsn_rgb_bn_inceptionseg5top3BNfreeze_iter_15000.caffemodel
+temporal_net_prototxt=/home/mscvproject/mscvproject/code/temporal-segment-networks/models/ActNet200/tsn_bn_inception_flow_deploy.prototxt
+temporal_net_model=/home/mscvproject/mscvproject/code/temporal-segment-networks/models/ActNet200/top5BNFreeze/ActNet200_tsn_flow_bn_inceptionseg5top3BNFreeze_iter_20000.caffemodel
+num_gpu=7	
+gpu_start_idx=9
+scores_dump_folder='scores/untrimmed_val/seg5/'
 score_layer_name='fc-action200'
 
 # scores meta info

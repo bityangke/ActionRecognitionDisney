@@ -161,7 +161,7 @@ class VideoMetaInfo:
 
 
 class DataActivityNet:
-    def __init__(self, annotation_file, frame_folders):
+    def __init__(self, annotation_file, frame_folders, trimmed=True):
         """
         initialize data manager for ActivityNet
         :param annotation_file: annotation file of ActivityNet
@@ -183,8 +183,9 @@ class DataActivityNet:
         self.video_seg_name_to_idx = {}
         self.split_indices = {'training': [], 'testing': [], 'validation': []}
         self.__annotation_file = annotation_file
+        self.trimmed = trimmed
 
-    def init(self):
+    def init(self, trimmed=True):
         """
         load annotation file
         :return:
@@ -306,7 +307,7 @@ class DataActivityNet:
         """
         create an iterator that iterate through frames of a video
         :param video_idx: the index of the video
-        :param frame_type: the type of the frame (0 for rgb, 1 for flow_x, 2 for flow_y)
+        :param frame_type: the type of the frame (0 for rgb, 1 for flow_x, 2 for flow_y, 3 for both flow_x and flow_y)
         :param batch_size:
         :param step:
         :return: (n, h, w, c) where n is less or equal to batch_size
@@ -374,7 +375,7 @@ class DataActivityNet:
         """
         nasty hack
         """
-        f = open('/data01/mscvproject/data/ActivityNetTrimflow/ActNetClassesInd.txt')
+        f = open('/data01/mscvproject/data/ActivityNetTrimflow/.scripts/ActNetClassesInd.txt')
         cleaned_label_name_to_idx = {}
         for line in f:
             fields = line.strip().split()
@@ -402,13 +403,21 @@ class DataActivityNet:
 
     def __parse_video_segments(self):
         self.video_seg_names = []
-        for name, meta in self.video_meta.iteritems():
-            num_seg = 1 if len(meta.annotations) == 0 else len(meta.annotations)
-            l = len(self.video_seg_names)
-            self.video_seg_names.extend([name + str(i) for i in range(num_seg)])
-            self.video_seg_labels.extend([self.label_name_to_idx(meta.label)] * num_seg)
-            self.split_indices[meta.subset].extend([l + i for i in range(num_seg)])
-            self.video_seg_name_to_idx.update({name + str(i): l + i for i in range(num_seg)})
+        if self.trimmed:
+            for name, meta in self.video_meta.iteritems():
+                num_seg = 1 if len(meta.annotations) == 0 else len(meta.annotations)
+                l = len(self.video_seg_names)
+                self.video_seg_names.extend([name + str(i) for i in range(num_seg)])
+                self.video_seg_labels.extend([self.label_name_to_idx(meta.label)] * num_seg)
+                self.split_indices[meta.subset].extend([l + i for i in range(num_seg)])
+                self.video_seg_name_to_idx.update({name + str(i): l + i for i in range(num_seg)})
+        else:
+            for name, meta in self.video_meta.iteritems():
+                l = len(self.video_seg_names)
+                self.video_seg_names.append(name)
+                self.video_seg_labels.append(self.label_name_to_idx(meta.label))
+                self.split_indices[meta.subset].append(l)
+                self.video_seg_name_to_idx[name] = l
 
     def __build_label_hierarchy_from_taxonomy(self, taxonomy):
         label_raw_infos = []
@@ -445,9 +454,9 @@ class DataActivityNet:
 
 
 if __name__ == '__main__':
-    data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
-                                   frame_folders='/data01/mscvproject/data/ActivityNetTrimflow/view')
-    data_manager.init()
+    # data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
+                                   # frame_folders='/data01/mscvproject/data/ActivityNetUntrimflow/view')
+    # data_manager.init()
     # print(data_manager.label_hierarchy)
 
     # for k, v in data_manager.video_meta.iteritems():
@@ -455,11 +464,11 @@ if __name__ == '__main__':
     # print(data_manager.get_video_names_by_class_name('Preparing salad'))
     # print(data_manager.get_video_paths_by_class_name('Preparing salad'))
 
-    print('number of videos: ' + str(len(data_manager.video_meta)))
-    print('number of instances: ' + str(len(data_manager.video_seg_names)))
-    print('training set: ' + str(len(data_manager.get_training_set()[0])))
-    print('validation set: ' + str(len(data_manager.get_validation_set()[0])))
-    print('testing set: ' + str(len(data_manager.get_testing_set()[0])))
+    # print('number of videos: ' + str(len(data_manager.video_meta)))
+    # print('number of instances: ' + str(len(data_manager.video_seg_names)))
+    # print('training set: ' + str(len(data_manager.get_training_set()[0])))
+    # print('validation set: ' + str(len(data_manager.get_validation_set()[0])))
+    # print('testing set: ' + str(len(data_manager.get_testing_set()[0])))
 
     # cnt = 0
     # print(data_manager.video_seg_names[0])
@@ -467,7 +476,16 @@ if __name__ == '__main__':
     #     print(len(frame_stack))
     #    print(frame_stack[0].shape)
 
-    names, labels = data_manager.get_validation_set()
+    # names, labels = data_manager.get_validation_set()
     # print(len(names))
     # for name, label in zip(names, labels):
     #     print(name, label)
+
+    data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
+                                   frame_folders='/data01/mscvproject/data/ActivityNetUntrimflow/view',
+                                   trimmed = False)
+    data_manager.init()
+    names, labels = data_manager.get_validation_set()
+    print('number of validation videos: ' + str(len(names)))
+
+
