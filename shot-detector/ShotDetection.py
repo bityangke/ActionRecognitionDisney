@@ -14,21 +14,22 @@ total = None
 
 def process_video(args):
     global count, total, lock
-    video_name, output_folder, idx = args
-    os.system('./Shotdetect/build/shotdetect-cmd -i {0} -o {1} -s 100 -a {2}'.format(video_name, output_folder, idx))
+    video_name, output_folder, threshold, idx = args
+    os.system('./Shotdetect/build/shotdetect-cmd -i {0} -o {1} -s {2} -a {3} -f -l -m'.format(video_name, output_folder, threshold, idx))
     lock.acquire()
     count.value += 1
     print('{0}/{1} videos completed.'.format(count.value, total))
     lock.release()
 
 
-def detect(num_threads, video_list, output_folder):
+def detect(num_threads, video_list, output_folder, threshold):
     """
     detect shots in videos in parallel
     Args:
         num_threads: number of worker threads
         video_list: list of video path
         output_folder: path to dump the result
+	threshold: how strict is the shot detection
     Returns:
     """
     global lock, count, total
@@ -38,7 +39,7 @@ def detect(num_threads, video_list, output_folder):
     count = Value('i', 0)
     total = len(video_list)
     p = multiprocessing.Pool(num_threads)
-    p.map(process_video, zip(video_list, [output_folder] * total, range(total)))
+    p.map(process_video, zip(video_list, [output_folder] * total, [threshold] * total, range(total)))
     return
 
 
@@ -52,6 +53,8 @@ if __name__ == '__main__':
                         help='output_folder to dump video shot info (.xml)')
     parser.add_argument('--num_threads', type=int,
                         help='number of worker threads')
+    parser.add_argument('--threshold', type=int, default=100,
+			help='threshold measuring how strict the shot detection is')
     args = parser.parse_args()
 
     # collect video list
@@ -62,4 +65,4 @@ if __name__ == '__main__':
             if file_name.endswith(args.extension):
                 video_list.append(file_path)
     print('{0} videos to be processed'.format(len(video_list)))
-    detect(num_threads=args.num_threads, video_list=video_list, output_folder=args.output_folder)
+    detect(num_threads=args.num_threads, video_list=video_list, output_folder=args.output_folder, threshold=args.threshold)

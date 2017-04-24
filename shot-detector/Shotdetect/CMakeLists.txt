@@ -2,10 +2,9 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT(shotdetect)
 
-SET(CMAKE_C_COMPILER "/usr/bin/clang")
-SET(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+SET(CMAKE_C_COMPILER "/home/mscvproject/install/usr/bin/clang")
+SET(CMAKE_CXX_COMPILER "/home/mscvproject/install/usr/bin/clang++")
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-
 
 # Get git version information for automatic embedding in version string:
 
@@ -193,8 +192,9 @@ IF(USE_WXWIDGETS AND wxWidgets_FOUND)
 ELSE()
     LIST(APPEND ${TARGET_NAME}_COMMANDLINE_SRCS src/commandline.cc)
     ADD_EXECUTABLE(${TARGET_NAME}-cmd ${SOURCES} ${${TARGET_NAME}_COMMANDLINE_SRCS})
-	TARGET_LINK_LIBRARIES(${TARGET_NAME}-cmd ${TARGET_NAME})
-    # Make this target optional to install:
+    SET(NASTY_FIX rt pthread z lzma bz2 avcodec avutil-ffmpeg gd)
+	TARGET_LINK_LIBRARIES(${TARGET_NAME}-cmd ${TARGET_NAME} ${NASTY_FIX})
+      	# Make this target optional to install:
     SET(TARGETS_TO_INSTALL ${TARGET_NAME}-cmd)
 ENDIF()
 
