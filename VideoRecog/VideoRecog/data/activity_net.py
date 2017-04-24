@@ -371,6 +371,26 @@ class DataActivityNet:
         video_seg_labels = [self.video_seg_labels[i] for i in indices]
         return video_seg_names, video_seg_labels
 
+    def get_video_segments_tags(self, video_name):
+        """
+        get a list of (start_frame, end_frame) tagging for videos
+        :return 
+        """
+        assert(not self.trimmed)
+        meta = self.video_meta[video_name]
+        annotations = meta.annotations
+
+        # compute FPS on the fly
+        total_frames = len(os.listdir(os.path.join(self.frame_folder, video_name)))
+        total_frames /= 3
+        assert(total_frames % 3)
+        duration = meta.duration
+        FPS = float(total_frames)/duration
+        result = []
+        for annotation in annotations:
+            result.append((int(annotation.start * FPS), int(annotation.end * FPS)))
+        return result
+
     def get_nasty_mapping(self):
         """
         nasty hack
@@ -488,4 +508,9 @@ if __name__ == '__main__':
     names, labels = data_manager.get_validation_set()
     print('number of validation videos: ' + str(len(names)))
 
+    name = names[0]
+    label = labels[0]
+    label_name = data_manager.label_idx_to_name(label)
+    segment_tags = data_manager.get_video_segments_tags(name)
+    print('segment tags for {2}/{0}: {1}'.format(name, str(segment_tags), label_name))
 
