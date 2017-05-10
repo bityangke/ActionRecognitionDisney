@@ -3,12 +3,29 @@ This module provides all the visualization routines
 @Yu
 """
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from skimage.transform import resize
 from skimage.color import rgb2grey
 from skimage.exposure import adjust_gamma
 from skimage.draw import polygon
 
+
+def plot_xy(x, y, xlabel, ylabel, title, dump_file, xy_range=None):
+    """
+    Plot the relationship between x and y
+    """
+    fig = plt.figure()
+    if title is not None and title != '':
+        fig.suptitle(title, fontsize=14, fontweight='bold')
+    ax = fig.add_subplot(111)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    if xy_range is not None:
+        ax.axis(xy_range)
+    ax.plot(x, y, 'x')
+    plt.savefig(dump_file)
 
 def plot_confusion_mat(confusion_mat, dump_file):
     """
@@ -149,10 +166,8 @@ def plot_frame_prediction_heat_map(spatial_stream_responses, rgb_frames,
 
 
 if __name__ == '__main__':
-    import skimage
-    import skimage.io
-    test_img = skimage.img_as_float(skimage.io.imread('test.png'))
-    test_img = test_img[:,:,:3]
-    highlight_boundary(test_img)
-    skimage.io.imsave('test_out.png', test_img)
+    a = [1,2,3,4,5,6,7]
+    b = [2,3,4,1,2,5,2]
+    plot_xy(a, b, 'X', 'Y', '', 'test.png', xy_range=[0,10,0,10])
+
 

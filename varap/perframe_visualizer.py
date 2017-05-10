@@ -1,21 +1,14 @@
-
 import sys
 import numpy as np
 import os
 import argparse
-
-from skimage.io import imread
-from skimage.io import imsave
-import cv2
-
 sys.path.append('../VideoRecog')
 import VideoRecog.eval.metrics as metrics
 import VideoRecog.eval.score_io as score_io
 import VideoRecog.visualization as vis
-
-from varap_common import dm_reg
-from varap_common import score_folder
-
+from skimage.io import imread
+from skimage.io import imsave
+import cv2
 import imageio
 
 def generate_perframe_prediction_visualization(score_file_path, subset, subset_video_idx, frame_size):
@@ -105,13 +98,16 @@ if __name__ == '__main__':
     parser.add_argument('--idx_within_subset', type=int, default=0,
                         help='idx of the video in the subset (default as 0)')
     parser.add_argument('--mode', type=str, default='both', choices=['video', 'image', 'both'],
-                        help='running mode (default as video)')
+                        help='running mode (default as both)')
     parser.add_argument('--height', type=int, default=150, 
                         help='height of each visualized frame (default as 150)')
     parser.add_argument('--width', type=int, default=150,
                         help='width of each visualized frame (default as 150)')
     args = parser.parse_args()
     assert args.score_path is not None, 'please specify --score_path <SCORE_PATH>'
+
+    from varap_common import dm_reg
+    from varap_common import score_folder
 
     # unpack all arguments
     score_path = args.score_path

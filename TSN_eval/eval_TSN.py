@@ -18,6 +18,7 @@ sys.path.append('/home/mscvproject/mscvproject/code/ActionRecognitionDisney/Vide
 from VideoRecog.data.activity_net import DataActivityNet
 from VideoRecog.eval.score_io import save_scores
 from VideoRecog.eval.score_io import ScoreDumpMeta
+import VideoRecog.config as config
 import argparse
 import multiprocessing
 import math
@@ -28,9 +29,10 @@ def init_data_manager_ACNet():
     Create and initialize data_manager for ActivityNet
     :return:
     """
-    data_manager = DataActivityNet(annotation_file='/home/mscvproject/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
-                                   frame_folders='/home/mscvproject/mscvproject/data/ActivityNetUntrimflow/view',
-                                   trimmed = False)
+    data_manager = DataActivityNet(annotation_file=config.activitynet_annotation_file,
+                                   frame_folders=config.activitynet_frame_folder,
+                                   trimmed=False)
+
     data_manager.init()
     return data_manager
 

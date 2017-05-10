@@ -8,6 +8,12 @@ import os
 import cv2
 import random
 
+# training video class idx file
+# (the class idx used for training is different from the one used for evaluation
+# thus we need this file to generate the mapping. The ultimate goal is to remove
+# this hack.)
+# activity_net_training_class_idx_file = '/data01/mscvproject/data/ActivityNetTrimflow/.scripts/ActNetClassesInd.txt'
+activity_net_training_class_idx_file = '/home/mscvproject/mscvproject/code/temporal-segment-networks/data/ActNet_splits/ActNetClasses.txt'
 
 class LabelRawInfo:
     """
@@ -182,6 +188,8 @@ class DataActivityNet:
         self.video_seg_labels = []
         self.video_seg_name_to_idx = {}
         self.split_indices = {'training': [], 'testing': [], 'validation': []}
+        self.total_count = {'training': 0, 'validation': 0, 'testing': 0}
+        self.valid_count = {'training': 0, 'validation': 0, 'testing': 0}
         self.__annotation_file = annotation_file
         self.trimmed = trimmed
 
@@ -393,14 +401,14 @@ class DataActivityNet:
 
     def get_nasty_mapping(self):
         """
-        nasty hack
+        nasty hack: get the mapping from data manager's label index to training pipeline's index
         """
-        f = open('/data01/mscvproject/data/ActivityNetTrimflow/.scripts/ActNetClassesInd.txt')
+        f = open(activity_net_training_class_idx_file)
         cleaned_label_name_to_idx = {}
         for line in f:
             fields = line.strip().split()
-            idx = int(fields[0])
-            name = fields[1]
+            idx = int(fields[1])
+            name = fields[0].replace(':','')
             cleaned_label_name_to_idx[name] = idx
         return {i: cleaned_label_name_to_idx[self.labels[i].replace(' ','')] for i in range(200)}
 
@@ -451,7 +459,31 @@ class DataActivityNet:
         self.label_idx_table = {self.labels[i]: i for i in range(len(self.labels))}
 
     def __parse_database(self, database):
-        self.video_meta = {name: DataActivityNet.__construct_video_meta(name, database[name]) for name in database.keys()}
+        self.video_meta = {}
+        self.total_count = {'training': 0, 'validation': 0, 'testing': 0}
+        self.valid_count = {'training': 0, 'validation': 0, 'testing': 0}
+        for name in database.keys():
+            meta = DataActivityNet.__construct_video_meta(name, database[name])
+            self.total_count[meta.subset] += 1
+            if self.__video_data_validity_check(meta):
+                self.video_meta[name] = meta
+                self.valid_count[meta.subset] += 1
+
+    def report_video_data_validity(self):
+        for k in self.total_count:
+            print('{1}/{2} {0} videos are valid.'.format(k, self.valid_count[k], self.total_count[k]))
+
+    def __video_data_validity_check(self, meta):
+        if self.trimmed:
+            for i in range(len(meta.annotations)):
+                video_frame_folders.append(os.path.join(self.frame_folder, meta.name + str(i)))
+        else:
+            video_frame_folders = [os.path.join(self.frame_folder, meta.name)]
+
+        for folder in video_frame_folders:
+            if not (os.path.exists(folder) and len(os.listdir(folder)) != 0):
+                return False
+        return True
 
     @staticmethod
     def __construct_video_meta(name, meta_info_description):
@@ -501,16 +533,15 @@ if __name__ == '__main__':
     # for name, label in zip(names, labels):
     #     print(name, label)
 
-    data_manager = DataActivityNet(annotation_file='/data01/mscvproject/data/ActivityNetTrimflow/.scripts/activity_net.v1-3.min.json',
-                                   frame_folders='/data01/mscvproject/data/ActivityNetUntrimflow/view',
+    activitynet_annotation_file='/home/mscvproject/mscvproject/data/tmp/activity_net.v1-3.min.json'
+    activitynet_frame_folder='/home/mscvproject/mscvproject/data/ActivityNetUntrimlongtimeflow/view'
+    data_manager = DataActivityNet(annotation_file=activitynet_annotation_file,
+                                   frame_folders=activitynet_frame_folder,
                                    trimmed = False)
     data_manager.init()
+    data_manager.report_video_data_validity()
     names, labels = data_manager.get_validation_set()
     print('number of validation videos: ' + str(len(names)))
 
-    name = names[0]
-    label = labels[0]
-    label_name = data_manager.label_idx_to_name(label)
-    segment_tags = data_manager.get_video_segments_tags(name)
-    print('segment tags for {2}/{0}: {1}'.format(name, str(segment_tags), label_name))
+    
 
